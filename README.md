@@ -1,4 +1,4 @@
-# agentic-cookie-browser
+# Agentic-Browser-Automation
 
 A Selenium browser agent that reuses your real browser profile (cookies, localStorage, sessions) and accepts commands via a file. Supports Firefox and Chrome. Designed to be driven by LLM agents like Claude Code.
 
