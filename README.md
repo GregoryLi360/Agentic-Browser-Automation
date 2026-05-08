@@ -4,12 +4,25 @@ A Selenium browser agent that reuses your real browser profile (cookies, localSt
 
 ## Table of contents
 
+- [Why](#why)
 - [Quickstart](#quickstart)
 - [How it works](#how-it-works)
 - [Browser options](#browser-options)
 - [Commands](#commands)
 - [Output](#output)
 - [Other tools](#other-tools)
+
+## Why
+
+Hooking an agentic LLM up to a browser UI — especially one where you're already logged in — is harder than it should be. Perplexity's Comet ballooned into a RAM-hog; OpenClaw burned tokens for little progress. Heavy "AI browser" apps own the whole stack and pay for it.
+
+This repo flips it: let Selenium drive a real browser using your existing profile (cookies, sessions, localStorage), dump each page to a static `.html` snapshot, and let any coding agent (Claude Code, etc.) read snapshots and write commands via a file. The agent doesn't need browser bindings — just file I/O. The browser doesn't need an LLM embedded — just a polling loop.
+
+Example use cases:
+
+- **Scraping behind anti-bot defenses** — e.g. Amazon listings, where a real logged-in profile + page-by-page navigation slips past detection that headless scrapers trip.
+- **Working inside auth-walled admin portals** — review applications, click through dashboards, fill forms in tools that require an active session cookie.
+- **Any LLM-driven workflow on a site you're already logged into** — the agent reads HTML snapshots and writes commands; no extra auth wiring.
 
 ## Quickstart
 
