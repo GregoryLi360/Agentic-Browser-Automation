@@ -111,7 +111,7 @@ python3 fetch.py https://example.com/api/data -b firefox -o output.json
 | Flag | Default | Description |
 |---|---|---|
 | `url` (positional) | required | Starting URL |
-| `-b, --browser` | `firefox` | `firefox` or `chrome` |
+| `-b, --browser` | auto-detect OS default (fallback `firefox`) | `firefox` or `chrome` |
 | `--profile` | auto-detect | Explicit profile path |
 | `--no-profile` | false | Fresh session (no cookies) |
 | `--headless` | false | No visible browser window |

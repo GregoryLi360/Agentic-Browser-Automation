@@ -18,6 +18,8 @@ import glob
 import json
 import os
 import shutil
+import subprocess
+import sys
 import tempfile
 import time
 from datetime import datetime
@@ -46,6 +48,65 @@ _PROFILE_GLOBS = {
         os.path.expandvars("%LOCALAPPDATA%/Google/Chrome/User Data"),  # Windows
     ],
 }
+
+
+_BROWSER_ID_MAP = {
+    # macOS bundle IDs / Linux .desktop / Windows ProgId — substring match, lowercased
+    "firefox": "firefox",
+    "mozilla": "firefox",
+    "librewolf": "firefox",
+    "chrome": "chrome",
+    "chromium": "chrome",
+    "google-chrome": "chrome",
+    "brave": "chrome",
+    "edge": "chrome",
+    "msedge": "chrome",
+}
+
+
+def _match_browser_id(raw):
+    """Map an OS-level browser identifier to 'firefox' or 'chrome'."""
+    if not raw:
+        return None
+    s = raw.lower()
+    for key, val in _BROWSER_ID_MAP.items():
+        if key in s:
+            return val
+    return None
+
+
+def detect_default_browser():
+    """Detect OS default browser. Returns 'firefox', 'chrome', or None."""
+    try:
+        if sys.platform == "darwin":
+            plist = os.path.expanduser(
+                "~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist"
+            )
+            out = subprocess.run(
+                ["plutil", "-convert", "json", "-o", "-", plist],
+                capture_output=True, text=True, timeout=5,
+            )
+            if out.returncode == 0:
+                data = json.loads(out.stdout)
+                for h in data.get("LSHandlers", []):
+                    if h.get("LSHandlerURLScheme") == "http":
+                        return _match_browser_id(h.get("LSHandlerRoleAll", ""))
+        elif sys.platform.startswith("linux"):
+            out = subprocess.run(
+                ["xdg-settings", "get", "default-web-browser"],
+                capture_output=True, text=True, timeout=5,
+            )
+            if out.returncode == 0:
+                return _match_browser_id(out.stdout.strip())
+        elif sys.platform == "win32":
+            import winreg
+            key = r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice"
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key) as k:
+                progid, _ = winreg.QueryValueEx(k, "ProgId")
+                return _match_browser_id(progid)
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError, ImportError):
+        pass
+    return None
 
 
 def find_default_profile(browser):
@@ -206,8 +267,8 @@ def create_driver(browser, profile_path, headless, no_profile):
 def main():
     parser = argparse.ArgumentParser(description="Selenium browser agent with command file interface")
     parser.add_argument("url", help="Starting URL to open")
-    parser.add_argument("-b", "--browser", default="firefox", choices=["firefox", "chrome"],
-                        help="Browser to use (default: firefox)")
+    parser.add_argument("-b", "--browser", default=None, choices=["firefox", "chrome"],
+                        help="Browser to use (default: auto-detect OS default, fall back to firefox)")
     parser.add_argument("--profile", default=None,
                         help="Browser profile path (default: auto-detect)")
     parser.add_argument("--no-profile", action="store_true",
@@ -216,7 +277,13 @@ def main():
                         help="Run in headless mode (no visible window)")
     args = parser.parse_args()
 
-    driver, tmp_dir = create_driver(args.browser, args.profile, args.headless, args.no_profile)
+    browser = args.browser
+    if browser is None:
+        detected = detect_default_browser()
+        browser = detected or "firefox"
+        print(f"Browser: {browser} ({'detected as OS default' if detected else 'fallback — could not detect OS default'})")
+
+    driver, tmp_dir = create_driver(browser, args.profile, args.headless, args.no_profile)
     driver.get(args.url)
     time.sleep(3)
     path = save_snapshot(driver.page_source, "init")
