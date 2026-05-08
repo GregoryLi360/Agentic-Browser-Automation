@@ -45,6 +45,26 @@ This is the core loop for driving the browser as an AI agent:
 4. **Wait**: Poll `result.txt` for a new timestamp (commands execute within ~1-3s)
 5. **Loop**: Read new snapshot, decide next action, repeat
 
+### Launching browse.py (be patient — large profiles are slow)
+
+`browse.py` runs in the foreground forever. Launch it with `run_in_background: true` and **wait for the ready marker** before sending commands. Profile copy can take 30–90s for a multi-GB Firefox profile, plus 10–20s Firefox boot — total can exceed 2 minutes. Do NOT abort early.
+
+```bash
+# Launch in background
+python3 browse.py https://example.com   # via Bash tool with run_in_background: true
+
+# Wait for ready (or surface errors fast). Adjust the output path to your task ID.
+until grep -qE "Watching|Traceback|Error|Exception" /path/to/task.output 2>/dev/null; do
+  sleep 5
+done
+tail -20 /path/to/task.output
+```
+
+Ready marker: `Watching commands.txt for commands...` (printed by browse.py main loop).
+Failure markers: `Traceback`, `Error`, `Exception`. Bail out of the wait loop on either.
+
+If you abort the launch prematurely, the partially-copied temp profile is left behind and you may also leave an orphan `geckodriver` / `firefox --marionette` pair. Clean up by killing only `browse.py`, `geckodriver`, `chromedriver` — never `firefox` itself (see Conventions).
+
 ### Commands
 
 | Command | Syntax | Notes |
@@ -116,3 +136,5 @@ python3 fetch.py https://example.com/api/data -b firefox -o output.json
 - Minimal dependencies — prefer stdlib
 - File-based IPC (commands.txt / result.txt) — no sockets or APIs
 - HTML snapshots are the primary way agents observe page state
+- **When asked to browse a website, always use browse.py** — do not use WebFetch or other tools. Launch browse.py, send commands via commands.txt, and read snapshots from data/ to observe page state.
+- **NEVER kill firefox or chrome processes directly** (e.g., `pkill firefox`, `pkill chrome`). This kills the user's real browser session with all their tabs. Only kill `browse.py` and the driver processes (`geckodriver`, `chromedriver`) when cleaning up.
