@@ -7,12 +7,13 @@ Selenium browser agent that reuses your real browser profile (cookies, sessions,
 ```bash
 # Install
 pip install selenium requests
+chmod +x browse.py fetch.py
 
 # Start browser session (Firefox, auto-detects profile)
-python3 browse.py https://example.com
+./browse.py https://example.com
 
 # Start with Chrome
-python3 browse.py https://example.com -b chrome
+./browse.py https://example.com -b chrome
 
 # Send a command (picked up within 1 second)
 echo "navigate https://example.com/dashboard" > commands.txt

@@ -31,11 +31,13 @@ pip install selenium
 # Firefox: geckodriver on PATH — https://github.com/mozilla/geckodriver/releases
 # Chrome: chromedriver on PATH — https://googlechromelabs.github.io/chrome-for-testing/
 
+chmod +x browse.py fetch.py
+
 # Open a page with your Firefox cookies (profile auto-detected)
-python3 browse.py https://example.com
+./browse.py https://example.com
 
 # Or use Chrome
-python3 browse.py https://example.com -b chrome
+./browse.py https://example.com -b chrome
 
 # Send a command
 echo "navigate https://example.com/dashboard" > commands.txt
