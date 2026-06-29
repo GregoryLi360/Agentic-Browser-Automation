@@ -1,0 +1,16 @@
+# Playwright CLI workspace + snapshots/logs
+.playwright/
+.playwright-cli/
+
+# Saved auth / storage state — contains cookies + login sessions. Never commit.
+*.state.json
+auth.json
+logged-in.json
+
+# Local env
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+vault.allow
+target/

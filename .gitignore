@@ -2,3 +2,13 @@ data/
 result.txt
 commands.txt
 __pycache__/
+.playwright/
+.playwright-cli/
+*.state.json
+auth.json
+.DS_Store
+.bw_session
+.claude/settings.local.json
+.claude/memory/
+vault.allow
+target/
