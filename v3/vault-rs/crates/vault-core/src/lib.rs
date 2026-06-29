@@ -1,7 +1,17 @@
-//! `vault-core` — the interface crate for an agent-facing credential broker: a domain
-//! model, the provider trait *slots* a broker composes, and the authentication runtime.
-//! No concrete backends live here — an impl crate (e.g. `vault`) supplies one per slot.
+//! `vault-core` — the interface crate for an agent-facing credential broker. Domain model
+//! + the provider trait *slots* a broker composes. No concrete backends live here.
 //!
-//! This first layer is `model`, the shared vocabulary every other layer speaks.
+//! - `model`  — shared vocabulary: `Item`, `Credential`, `Secret`, `Origin`, `Target`.
+//! - `source` — `PasswordManager`, `OtpGenerator`, `VerificationSource` (+ the `Cached`
+//!   decorator), re-exported so callers say `source::PasswordManager` (no stutter).
+//! - `surface`— `Surface`: detects the `Challenge` a login presents and applies values.
+//! - `policy` — `TargetPolicy`: authorize + bind targets.
+//! - `flow`   — `Flow`: federated (OAuth/SSO, magic-link) sign-in.
+//! - `passkey`— `PasskeyAuthenticator`: the WebAuthn assertion ceremony.
 
+pub mod flow;
 pub mod model;
+pub mod passkey;
+pub mod policy;
+pub mod source;
+pub mod surface;
