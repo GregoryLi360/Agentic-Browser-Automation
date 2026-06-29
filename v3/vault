@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Launcher for the Rust credential broker. Does not change cwd (so playwright-cli
+# finds its workspace and vault.allow resolves relative to where you run it).
+set -euo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BIN="$DIR/vault-rs/target/release/vault"
+[ -x "$BIN" ] || BIN="$DIR/vault-rs/target/debug/vault"
+[ -x "$BIN" ] || { echo '{"ok":false,"error":"vault not built — run: (cd v3/vault-rs && cargo build --release)"}'; exit 1; }
+exec "$BIN" "$@"
