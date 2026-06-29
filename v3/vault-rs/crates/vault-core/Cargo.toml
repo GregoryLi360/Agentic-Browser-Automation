@@ -1,0 +1,14 @@
+[package]
+name = "vault-core"
+version = "0.1.0"
+edition = "2021"
+description = "Interfaces and domain model for a layered, request-only credential broker. Defines the broker and the provider slots it composes (credential source, page driver, detector, OTP generator, origin policy, verification source); contains no concrete backends."
+
+[lib]
+name = "vault_core"
+path = "src/lib.rs"
+
+[dependencies]
+thiserror = "1"
+url = "2"
+zeroize = "1"
